@@ -1,9 +1,13 @@
 import Phaser from 'phaser';
 
+// Import assets from src directory
+import skyImage from './assets/sky.png';
+import dudeSheet from './assets/dude.png';
+
 const config = {
   type: Phaser.AUTO,
-  width: window.innerWidth,  // Full width
-  height: window.innerHeight, // Full height
+  width: window.innerWidth,
+  height: window.innerHeight,
   backgroundColor: '#ffffff', // Solid white background
   physics: {
     default: 'arcade',
@@ -21,14 +25,10 @@ const config = {
 
 const game = new Phaser.Game(config);
 
-let dude;
-let cursors;
-let background;
-
 function preload () {
-  // Load assets here
-  this.load.image('sky', 'assets/sky.png'); // Path to your background image
-  this.load.spritesheet('dude', 'assets/dude.png', {
+  // Load assets using imported paths
+  this.load.image('sky', skyImage);
+  this.load.spritesheet('dude', dudeSheet, {
     frameWidth: 32,
     frameHeight: 48
   });
@@ -36,35 +36,53 @@ function preload () {
 
 function create () {
   // Add a large, tiled background
-  background = this.add.tileSprite(0, 0, config.width, config.height, 'sky');
-  background.setOrigin(0, 0); // Set the origin to the top-left corner
+  this.add.tileSprite(0, 0, config.width, config.height, 'sky').setOrigin(0, 0);
 
-  // Add a physics sprite
-  dude = this.physics.add.sprite(400, 300, 'dude');
-  dude.setCollideWorldBounds(true); // Prevent the sprite from going out of bounds
+  // Add a physics sprite and store it in the scene
+  this.dude = this.physics.add.sprite(400, 300, 'dude');
+  this.dude.setCollideWorldBounds(true); // Prevent the sprite from going out of bounds
 
-  // Set up keyboard controls
-  cursors = this.input.keyboard.createCursorKeys();
+  // Set up keyboard controls and store in scene
+  this.cursors = this.input.keyboard.createCursorKeys();
+
+  // Add WASD controls
+  this.wasdKeys = {
+    left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+    right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+    up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+    down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+  };
 }
 
 function update () {
-  // Movement speed
   const speed = 160;
 
-  // Check for cursor input and move the character
-  if (cursors.left.isDown) {
-    dude.setVelocityX(-speed); // Move left
-  } else if (cursors.right.isDown) {
-    dude.setVelocityX(speed); // Move right
+  // Get current movement input from cursors or WASD
+  let isMoving = false;
+
+  if (this.cursors.left.isDown || this.wasdKeys.left.isDown) {
+    this.dude.setVelocityX(-speed); // Move left
+    isMoving = true;
+  } else if (this.cursors.right.isDown || this.wasdKeys.right.isDown) {
+    this.dude.setVelocityX(speed); // Move right
+    isMoving = true;
   } else {
-    dude.setVelocityX(0); // Stop horizontal movement
+    this.dude.setVelocityX(0); // Stop horizontal movement
   }
 
-  if (cursors.up.isDown) {
-    dude.setVelocityY(-speed); // Move up
-  } else if (cursors.down.isDown) {
-    dude.setVelocityY(speed); // Move down
+  if (this.cursors.up.isDown || this.wasdKeys.up.isDown) {
+    this.dude.setVelocityY(-speed); // Move up
+    isMoving = true;
+  } else if (this.cursors.down.isDown || this.wasdKeys.down.isDown) {
+    this.dude.setVelocityY(speed); // Move down
+    isMoving = true;
   } else {
-    dude.setVelocityY(0); // Stop vertical movement
+    this.dude.setVelocityY(0); // Stop vertical movement
+  }
+
+  // If not moving, play the 'turn' animation
+  if (!isMoving) {
+    this.dude.setVelocityX(0);
+    this.dude.setVelocityY(0);
   }
 }
