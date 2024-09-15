@@ -8,7 +8,7 @@ const config = {
   type: Phaser.AUTO,
   width: window.innerWidth,
   height: window.innerHeight,
-  backgroundColor: '#ffffff', // Solid white background
+  backgroundColor: '#ffffff',
   physics: {
     default: 'arcade',
     arcade: {
@@ -35,8 +35,8 @@ function preload () {
 }
 
 function create () {
-  // Add a large, tiled background
-  this.add.tileSprite(0, 0, config.width, config.height, 'sky').setOrigin(0, 0);
+  // Create a tiled background and store it in the scene
+  this.skyBackground = this.add.tileSprite(0, 0, config.width, config.height, 'sky').setOrigin(0, 0);
 
   // Add a physics sprite and store it in the scene
   this.dude = this.physics.add.sprite(400, 300, 'dude');
@@ -56,6 +56,7 @@ function create () {
 
 function update () {
   const speed = 160;
+  const scrollSpeed = 2; // Adjust the background scroll speed
 
   // Get current movement input from cursors or WASD
   let isMoving = false;
@@ -63,9 +64,11 @@ function update () {
   if (this.cursors.left.isDown || this.wasdKeys.left.isDown) {
     this.dude.setVelocityX(-speed); // Move left
     isMoving = true;
+    this.skyBackground.tilePositionX -= scrollSpeed; // Scroll background to the right (opposite direction)
   } else if (this.cursors.right.isDown || this.wasdKeys.right.isDown) {
     this.dude.setVelocityX(speed); // Move right
     isMoving = true;
+    this.skyBackground.tilePositionX += scrollSpeed; // Scroll background to the left (opposite direction)
   } else {
     this.dude.setVelocityX(0); // Stop horizontal movement
   }
@@ -73,14 +76,16 @@ function update () {
   if (this.cursors.up.isDown || this.wasdKeys.up.isDown) {
     this.dude.setVelocityY(-speed); // Move up
     isMoving = true;
+    this.skyBackground.tilePositionY -= scrollSpeed; // Scroll background downwards (opposite direction)
   } else if (this.cursors.down.isDown || this.wasdKeys.down.isDown) {
     this.dude.setVelocityY(speed); // Move down
     isMoving = true;
+    this.skyBackground.tilePositionY += scrollSpeed; // Scroll background upwards (opposite direction)
   } else {
     this.dude.setVelocityY(0); // Stop vertical movement
   }
 
-  // If not moving, play the 'turn' animation
+  // If not moving, stop any scrolling of the background
   if (!isMoving) {
     this.dude.setVelocityX(0);
     this.dude.setVelocityY(0);
